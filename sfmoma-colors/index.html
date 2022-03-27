@@ -1,23 +1,23 @@
 <body>
- <div class="innerbox">
- <div class="colorstrip" style="overflow:auto;" id="topdiv">
+ <div style="overflow:auto;" id="topdiv">
 	<img id="colorstrip" src="colors-entirety-forweb.png">
   </div>
-  </div>
-  <iframe class="webview" id="webview" src="about:blank" style="flex: 1 1 auto;" frameborder="0" scrolling="yes"></iframe>
+<div id="webviewcontainer">
+  <iframe id="webview" src="about:blank" frameborder="0" width="100%" height="100%" scrolling="yes"></iframe>
+</div>
 </body>
 
 <style>
 html,
 body {
-  height: 100%;
   margin: 0;
   display: flex;
   flex-flow: column;
   height: 100%;
+  transition: background-color 0.2s;
 }
 
-.colorstrip {
+#colorstrip {
   flex: 0 1 auto;
   /* The above is shorthand for:
   flex-grow: 0,
@@ -26,9 +26,18 @@ body {
   */
 }
 
-.webview{
+#webviewcontainer{
   flex: 1 1 auto;
-  margin:20;
+  height: 100%;
+  padding:50;
+  <!-- margin:50; -->
+}
+
+#webview {
+  <!-- height: 90%; -->
+  <!-- width: 90%; -->
+  <!-- padding:50; -->
+  <!-- flex: 1 1 auto; -->
 }
 
 </style>
@@ -40,6 +49,8 @@ colorlist = [[30, 192, 211], [26, 211, 199], [2, 219, 205], [107, 226, 215], [12
 
 document.getElementById('colorstrip').addEventListener('click', printPosition)
 document.getElementById('colorstrip').addEventListener('mousemove', colorstripMouseover)
+document.getElementById('webviewcontainer').addEventListener('click', clearWebview)
+
 
 function getPosition(e) {
   var rect = e.target.getBoundingClientRect();
@@ -52,10 +63,13 @@ function getPosition(e) {
 }
 
 function colorstripMouseover(e) {
-  var position = getPosition(e);
-  var color = colorlist[position.x];
-  var rgbcolor = "rgb(" + color[0] + ", " + color[1] + ", " + color[2] + ")"
-  document.body.style.backgroundColor = rgbcolor;
+  if (document.getElementById('webview').src == "about:blank") {
+     var position = getPosition(e);
+     var color = colorlist[position.x];
+     var rgbcolor = "rgb(" + color[0] + ", " + color[1] + ", " + color[2] + ")"
+     document.body.style.backgroundColor = rgbcolor;
+     document.body.style.scrollbarTrackColor = rgbcolor;
+   };
 }
 
 function printPosition(e) {
@@ -64,6 +78,10 @@ function printPosition(e) {
   var url = 'https://www.sfmoma.org/artwork/' + artwork;
   document.getElementById('webview').src = url;
 
+}
+
+function clearWebview() {
+  document.getElementById('webview').src = "about:blank";
 }
 
 
