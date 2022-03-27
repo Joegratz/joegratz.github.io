@@ -1,5 +1,5 @@
 <body>
- <div style="overflow:auto;" id="topdiv">
+ <div id="topdiv">
 	<img id="colorstrip" src="colors-entirety-forweb.png">
   </div>
 <div id="webviewcontainer">
@@ -17,8 +17,13 @@ body {
   transition: background-color 0.2s;
 }
 
+#topdiv {
+  overflow-y: hidden; 
+}
+
 #colorstrip {
   flex: 0 1 auto;
+  overflow-y: hidden; 
   /* The above is shorthand for:
   flex-grow: 0,
   flex-shrink: 1,
@@ -64,15 +69,20 @@ function getPosition(e) {
 
 function colorstripMouseover(e) {
   if (document.getElementById('webview').src == "about:blank") {
-     var position = getPosition(e);
-     var color = colorlist[position.x];
-     var rgbcolor = "rgb(" + color[0] + ", " + color[1] + ", " + color[2] + ")"
-     document.body.style.backgroundColor = rgbcolor;
-     document.body.style.scrollbarTrackColor = rgbcolor;
+      changeBackgroundColor(e);
    };
 }
 
+function changeBackgroundColor(e) {
+   var position = getPosition(e);
+   var color = colorlist[position.x];
+   var rgbcolor = "rgb(" + color[0] + ", " + color[1] + ", " + color[2] + ")"
+   document.body.style.backgroundColor = rgbcolor;
+   document.body.style.scrollbarTrackColor = rgbcolor;
+}
+  
 function printPosition(e) {
+  changeBackgroundColor(e);
   var position = getPosition(e);
   var artwork = artworklist[position.x];
   var url = 'https://www.sfmoma.org/artwork/' + artwork;
