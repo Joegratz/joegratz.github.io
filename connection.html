@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Internet Connection Status</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            font-size: 2rem;
+        }
+        #main-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 67%;
+            text-align: center;
+        }
+        #status {
+            font-size: 10rem;
+            margin-bottom: 20px;
+        }
+        #history-panel {
+            height: 33%;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        #history-panel h2 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+        #history {
+            font-size: 1rem;
+            list-style: none;
+            padding: 0;
+        }
+        #history li {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="main-content">
+        <div id="status">🔄</div>
+        <div id="connection-info"></div>
+    </div>
+    <div id="history-panel">
+        <h2>Change History</h2>
+        <ul id="history"></ul>
+    </div>
+
+    <script>
+        let lastStatus = null;
+        let lastLatency = null;
+        const historyList = document.getElementById('history');
+
+        function addHistoryEntry(type, latency, timestamp) {
+            const entry = document.createElement('li');
+            entry.setAttribute('data-timestamp', timestamp);
+            const minutesAgo = Math.floor((Date.now() - timestamp) / 60000);
+            const timeAgoText = minutesAgo === 1 ? "1 minute ago" : `${minutesAgo} minutes ago`;
+            entry.textContent = `${type} ${latency ? `(Latency: ${latency} ms)` : ''} - ${timeAgoText}`;
+            historyList.insertBefore(entry, historyList.firstChild);
+        }
+
+        function updateTimestamps() {
+            const entries = historyList.getElementsByTagName('li');
+            const now = Date.now();
+            for (let i = 0; i < entries.length; i++) {
+                const entry = entries[i];
+                const timestamp = parseInt(entry.getAttribute('data-timestamp'), 10);
+                const minutesAgo = Math.floor((now - timestamp) / 60000);
+                const timeAgoText = minutesAgo === 1 ? "1 minute ago" : `${minutesAgo} minutes ago`;
+                entry.textContent = entry.textContent.replace(/-\s*\d+\s*minutes? ago/, `- ${timeAgoText}`);
+            }
+        }
+
+        async function checkInternetConnection() {
+            const statusDiv = document.getElementById('status');
+            const infoDiv = document.getElementById('connection-info');
+            let startTime, latency;
+
+            try {
+                startTime = Date.now();
+                await fetch('https://www.google.com/generate_204', {
+                    method: 'HEAD',
+                    mode: 'no-cors'
+                });
+                latency = Date.now() - startTime;
+
+                if (lastStatus !== 'online' || (lastLatency !== null && Math.abs(latency - lastLatency) > 50)) {
+                    addHistoryEntry('Connected', latency, startTime);
+                }
+                lastStatus = 'online';
+                lastLatency = latency;
+
+                statusDiv.textContent = '✅';
+                infoDiv.innerHTML = `<p><strong>Latency:</strong> ${latency} ms</p>`;
+            } catch (error) {
+                if (lastStatus !== 'offline') {
+                    addHistoryEntry('Disconnected', null, Date.now());
+                }
+                lastStatus = 'offline';
+                lastLatency = null;
+
+                statusDiv.textContent = '😢'; // Show sad face emoji when disconnected
+                infoDiv.innerHTML = ''; // Clear info when disconnected
+            }
+
+            updateTimestamps();
+        }
+
+        checkInternetConnection(); // Initial check
+        setInterval(checkInternetConnection, 10000); // Poll every 10 seconds
+    </script>
+</body>
+</html>
